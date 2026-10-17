@@ -41,7 +41,7 @@ SmtpSettings__SenderEmail="seu_email@gmail.com"
 SmtpSettings__Username="seu_email@gmail.com"
 SmtpSettings__ReceiverEmail="destinatario@email.com"
 SmtpSettings__Password="sua_senha_de_app"
-``
+```
 ---
 
 ## 🛠️ Tecnologias e Bibliotecas
