@@ -1,6 +1,6 @@
 
 
-public interface IEmailSender
+public interface ISmtpEmailSender
 {
     Task SendAsync(string subject, string htmlBody);
 }

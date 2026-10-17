@@ -12,7 +12,13 @@ Application em linha de comando (CLI) desenvolvida em **C# / .NET** para monitor
 - **Tratamento de Erros e Resiliência:** Validação de tickers inexistentes e exceções customizadas (`BrapiApiException`).
 
 ---
+## 💻 Execução
+- Exemplo de execução o dotnet:
+`
+   dotnet run PETR3 56.15 56.25    
+`
 
+---
 ## ⚙️ Funcionamento das Configurações (`appsettings.json` vs `.env`)
 
 O projeto utiliza o sistema de hierarquia de configurações do .NET, onde **as variáveis de ambiente do arquivo `.env` sobrescrevem as chaves do `appsettings.json`**.
@@ -56,18 +62,37 @@ SmtpSettings__Password="sua_senha_de_app"
 - **`DotNetEnv`**  Leitura de variáveis de ambiente a partir de arquivos `.env` locais. |
 - **`System.Security.Cryptography.Pkcs`**  Correção explícita de segurança para mitigação de vulnerabilidades transitivas. 
 
+## 🎯 Decisão de Arquitetura: Dependências Modulares vs. Host Genérico
+
+Considerando o escopo enxuto e a natureza focada da aplicação (CLI), optou-se por **importar cada pacote do ecossistema `.Extensions` de forma individual e pontual** (como `Microsoft.Extensions.Configuration` e `Microsoft.Extensions.Configuration.UserSecrets`), em vez de incluir a infraestrutura completa do `Microsoft.Extensions.Hosting`.
+
+### Principais Motivações:
+
+- **Menor Overhead (Footprint Leve):** Evita incluir abstrações de ciclo de vida de Host e dependências não utilizadas para um utilitário de terminal direto.
+- **Controle e Transparência:** Cada biblioteca adicionada ao `.csproj` possui uma responsabilidade única e explícita no projeto.
+- **Simplicidade de Execução:** Mantém a inicialização e a leitura de configurações diretas, reduzindo o tempo de boot e a complexidade do código de setup.
+
 ---
+
+## 🎨 Template HTML dos E-mails
+
+O layout do e-mail de notificação foi **gerado com o auxílio de Inteligência Artificial**, permitindo a criação de uma estrutura HTML responsiva, estilizada e compatível com os principais leitores de e-mail, sem misturar a lógica de design com a lógica de envio do C#.
+
+---
+
+
 
 ## 📁 Arquitetura e Estrutura do Projeto
 
-O código é organizado em camadas claras seguindo a separação de responsabilidades (SoC):
+O projeto adota uma organização baseada no princípio de **Separação de Responsabilidades (SoC)** e **Clean Code**, isolando configurações, modelos, exceções e serviços (**desenvolvido com o auxílio de Inteligência Artificial**):
 
 ```text
 src/
 ├── Configuration/
-│   └── SmtpSettings.cs               # Mapeamento fortemente tipado das configurações de e-mail
+│   ├── SmtpSettings.cs               # Mapeamento fortemente tipado das configurações de e-mail
+│   └── BrapiSettings.cs              # Mapeamento fortemente tipado das configurações da API do Brapi
 ├── Exceptions/
-│   └── BrapiApiException.cs          # Exceção de domínio para falhas na API de cotações
+│   └── Exceptions.cs                 # Exceção de domínio para falhas na API de cotações e do Email SMTP
 ├── Models/
 │   ├── Quote.cs                      # Modelo de dados da cotação
 │   └── QuoteResponse.cs              # DTO para desserialização da resposta JSON

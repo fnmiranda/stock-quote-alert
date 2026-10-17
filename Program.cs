@@ -30,36 +30,25 @@ class Program
         minPrice = decimal.Parse(args[1].Replace(',', '.'), CultureInfo.InvariantCulture);
         maxPrice = decimal.Parse(args[2].Replace(',', '.'), CultureInfo.InvariantCulture);
 
-        
-
         Env.Load();
         var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddUserSecrets<Program>().AddEnvironmentVariables();
         IConfiguration config = builder.Build();
         var smtpSettings = config.GetSection("SmtpSettings").Get<SmtpSettings>() ?? throw new InvalidOperationException("Seção SmtpSettings não configurada.");
 
-        IEmailSender emailSender = new SmtpEmailSender(smtpSettings);
+        ISmtpEmailSender emailSender = new SmtpEmailSender(smtpSettings);
         IStockQuoteEmailComposer emailComposer = new StockQuoteEmailComposer();
         IStockService service = new StockService();
-
-        var client = new BrapiClient(Environment.GetEnvironmentVariable("BRAPI_API_KEY")!);
-        var stockQuoteAlert = new StockQuoteAlert(emailSender,emailComposer); 
-
-        try
+        var stockQuoteAlert = new StockQuoteAlert(emailSender,emailComposer);
+        
+        var brapiSettings = config.GetSection("BrapiSettings").Get<BrapiSettings>();
+        if (brapiSettings?.ApiKey == null || string.IsNullOrWhiteSpace(brapiSettings.ApiKey))
         {
-            var initialQuote = await client.GetQuoteAsync(ticker);
-
-            if (initialQuote == null)
-            {
-                Console.WriteLine($"Erro: O ativo '{ticker}' não foi encontrado na API da Brapi. Verifique o código e tente novamente.");
-                return; 
-            }
-            Console.WriteLine($"Ativo localizado: {initialQuote.ShortName}");
-        }
-        catch (BrapiApiException ex)
-        {
-            Console.WriteLine($" Erro de integração {ex.Message}");
+            Console.WriteLine("A ApiKey da Brapi não foi informada ou está vazia no .env / appsettings.json.");
             return;
         }
+        if(brapiSettings == null) return;
+
+        var client = new BrapiClient(brapiSettings);
 
         while (true)
         {
@@ -81,14 +70,17 @@ class Program
             catch(BrapiApiException ex)
             {
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}]: Erro de integração na API: {ex.Message}");
+                return;
             }
             catch(EmailSendException ex)
             {
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}]: Erro de E-mail: {ex.Message}");
+                return;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}]: Erro inexperado: {ex.Message}");
+                return;
             }
         }
     }

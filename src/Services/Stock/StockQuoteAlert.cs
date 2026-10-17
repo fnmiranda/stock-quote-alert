@@ -2,9 +2,9 @@
 public class StockQuoteAlert : IStockQuoteAlert
 {
 
-    private readonly IEmailSender _emailSender;
+    private readonly ISmtpEmailSender _emailSender;
     private readonly IStockQuoteEmailComposer _emailComposer;
-    public StockQuoteAlert(IEmailSender emailSender, IStockQuoteEmailComposer emailComposer)
+    public StockQuoteAlert(ISmtpEmailSender emailSender, IStockQuoteEmailComposer emailComposer)
     {
         _emailSender = emailSender;
         _emailComposer = emailComposer;
