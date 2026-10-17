@@ -1,4 +1,4 @@
 public class QuoteResponse
 {
-    public Quote[]? Results {get;set;}
+    public required Quote[] Results {get;set;}
 }
