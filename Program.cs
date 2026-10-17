@@ -1,57 +1,100 @@
-﻿using System;
-using System.Threading;
-
+﻿
+using DotNetEnv;
+using Microsoft.Extensions.Configuration;
+using System.Globalization;
 class Program
 {
-    public static void LogController(dynamic quote, string sale)
+    static async Task Main(string[] args)
     {
-        Console.WriteLine($"{quote.Symbol} - {sale}");
-        Console.WriteLine($"RegularMarketPrice: R$ {quote.RegularMarketPrice:F2}");
-        Console.WriteLine($"RegularMarketChangePercent: {quote.RegularMarketChangePercent}%");
-        Console.WriteLine($"Currency: {quote.Currency}");
-    }
-    static async Task Main()
-    {
-        int w = 10;
-        while (w > 0)
+        string ticker;
+        decimal minPrice; 
+        decimal maxPrice;
+
+        if (args.Length < 3)
         {
-
-            var email = new EmailController();
-
-            var client = new BrapiClient(Environment.GetEnvironmentVariable("BRAPI_API_KEY")!);
-            string ticker = "PETR4";
-            var quote = await client.GetQuoteAsync(ticker);
-
-            if(quote != null)
-            {
-
-                string sale = "";
-
-                if (quote.RegularMarketPrice>56.25m)
-                {
-                    sale = "Vender";
-                    await email.SendEmail(quote,sale);
-                    LogController(quote, sale);
-                }
-                else if (quote.RegularMarketPrice<56.15m)
-                {
-                    sale = "Comprar";
-                    await email.SendEmail(quote,sale);
-                    LogController(quote, sale);
-
-                }else
-                {
-                    LogController(quote, "Nada");
-                }
-                
-                
-            }
-            Thread.Sleep(60000); 
-            w--;
+            Console.WriteLine("Uso incorreto!");
+            Console.WriteLine("Exemplo correto (Ativo Valor Mínimo Valor Máximo): dotnet run PETR4 56.15 56.25");
+            return;
         }
+
+        
+        ticker = args[0].ToUpper();
+        
+
+        if(!decimal.TryParse(args[1],out minPrice) || !decimal.TryParse(args[2],out maxPrice))
+        {
+            Console.WriteLine("Valor númerico incorreto. Exemplo de execução correta: dotnet run PETR4 56.15 56.25");
+            return;
+        }
+  
+        minPrice = decimal.Parse(args[1].Replace(',', '.'), CultureInfo.InvariantCulture);
+        maxPrice = decimal.Parse(args[2].Replace(',', '.'), CultureInfo.InvariantCulture);
+
+        
+
+        Env.Load();
+        var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddUserSecrets<Program>().AddEnvironmentVariables();
+        IConfiguration config = builder.Build();
+        var smtpSettings = config.GetSection("SmtpSettings").Get<SmtpSettings>() ?? throw new InvalidOperationException("Seção SmtpSettings não configurada.");
+
+        IEmailSender emailSender = new SmtpEmailSender(smtpSettings);
+        IStockQuoteEmailComposer emailComposer = new StockQuoteEmailComposer();
+        IStockService service = new StockService();
+
+        var client = new BrapiClient(Environment.GetEnvironmentVariable("BRAPI_API_KEY")!);
+        var stockQuoteAlert = new StockQuoteAlert(emailSender,emailComposer); 
+
+        try
+        {
+            var initialQuote = await client.GetQuoteAsync(ticker);
+
+            if (initialQuote == null)
+            {
+                Console.WriteLine($"[ERRO] O ativo '{ticker}' não foi encontrado na API da Brapi. Verifique o código e tente novamente.");
+                return; 
+            }
+            Console.WriteLine($"Ativo localizado: {initialQuote.ShortName}");
+        }
+        catch (BrapiApiException ex)
+        {
+            Console.WriteLine($"[ERRO DE INTEGRAÇÃO] {ex.Message}");
+            return;
+        }
+
+        while (true)
+        {
+            try
+            {
+                var quote = await client.GetQuoteAsync(ticker);
+
+                if(quote != null)
+                {
+                    string? action = service.EvaluateQuote(quote, minPrice, maxPrice);
+                    if (action != null)
+                    {
+                        await stockQuoteAlert.ProcessQuoteAlertAsync(quote, action);
+                        Console.WriteLine($" Alerta: {action} Ação - {quote.ShortName} - {quote.Symbol} {quote.RegularMarketPrice}");
+                    }
+                }
+                Thread.Sleep(60000); 
+            }
+            catch(BrapiApiException ex)
+            {
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}]: Erro de integração na API: {ex.Message}");
+            }
+            catch(EmailSendException ex)
+            {
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}]: Erro de E-mail: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}]: Erro inexperado: {ex.Message}");
+            }
+        }
+    }
         
 
         
-    }
+    
 }
 
