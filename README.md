@@ -13,6 +13,37 @@ Application em linha de comando (CLI) desenvolvida em **C# / .NET** para monitor
 
 ---
 
+## ⚙️ Funcionamento das Configurações (`appsettings.json` vs `.env`)
+
+O projeto utiliza o sistema de hierarquia de configurações do .NET, onde **as variáveis de ambiente do arquivo `.env` sobrescrevem as chaves do `appsettings.json`**.
+
+### Como funciona a integração:
+
+1. **`appsettings.json` (Estrutura e Padrões):**
+   Define a estrutura das configurações e armazena dados não sensíveis de infraestrutura (como o endereço do servidor `smtp.gmail.com` e a porta `587`).
+
+2. **`.env` / Variáveis de Ambiente (Segredos e Credenciais):**
+   Armazena credenciais sensíveis e dados específicos de ambiente. Para mapear propriedades aninhadas do JSON via variáveis de ambiente, utilize o separador de **duplo sublinhado (`__`)**:
+
+   | Variável no `.env` | Chave Equivalente no `appsettings.json` |
+   | :--- | :--- |
+   | `SmtpSettings__SenderEmail` | `SmtpSettings:SenderEmail` |
+   | `SmtpSettings__Username` | `SmtpSettings:Username` |
+   | `SmtpSettings__Password` | `SmtpSettings:Password` |
+   | `BRAPI_API_KEY` | `BrapiSettings:Token` |
+
+### Exemplo de `.env` para Desenvolvimento Local:
+
+```env
+BRAPI_API_KEY="seu_token_aqui"
+
+SmtpSettings__SenderEmail="seu_email@gmail.com"
+SmtpSettings__Username="seu_email@gmail.com"
+SmtpSettings__ReceiverEmail="destinatario@email.com"
+SmtpSettings__Password="sua_senha_de_app"
+
+---
+
 ## 🛠️ Tecnologias e Bibliotecas
 
 - **[C# / .NET 8.0+](https://dotnet.microsoft.com/)** — Plataforma de desenvolvimento principal.
