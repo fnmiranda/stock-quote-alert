@@ -50,14 +50,14 @@ class Program
 
             if (initialQuote == null)
             {
-                Console.WriteLine($"[ERRO] O ativo '{ticker}' não foi encontrado na API da Brapi. Verifique o código e tente novamente.");
+                Console.WriteLine($"Erro: O ativo '{ticker}' não foi encontrado na API da Brapi. Verifique o código e tente novamente.");
                 return; 
             }
             Console.WriteLine($"Ativo localizado: {initialQuote.ShortName}");
         }
         catch (BrapiApiException ex)
         {
-            Console.WriteLine($"[ERRO DE INTEGRAÇÃO] {ex.Message}");
+            Console.WriteLine($" Erro de integração {ex.Message}");
             return;
         }
 
@@ -73,7 +73,7 @@ class Program
                     if (action != null)
                     {
                         await stockQuoteAlert.ProcessQuoteAlertAsync(quote, action);
-                        Console.WriteLine($" Alerta: {action} Ação - {quote.ShortName} - {quote.Symbol} {quote.RegularMarketPrice}");
+                        Console.WriteLine($" Alerta: {action} Ativo - {quote.ShortName} - {quote.Symbol} {quote.RegularMarketPrice}");
                     }
                 }
                 Thread.Sleep(60000); 
