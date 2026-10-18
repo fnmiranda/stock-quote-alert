@@ -1,6 +1,7 @@
 ﻿
 using DotNetEnv;
 using Microsoft.Extensions.Configuration;
+using Superpower;
 using System.Globalization;
 class Program
 {
@@ -43,7 +44,16 @@ class Program
             Console.WriteLine("A ApiKey da Brapi não foi informada ou está vazia no .env / appsettings.json.");
             return;
         }
+
+        int delay = 0;
+        if (!int.IsEvenInteger(brapiSettings.Delay))
+        {
+            delay = 60000;
+        }
+        delay = brapiSettings.Delay;
+
         if(brapiSettings == null) return;
+
 
         var client = new BrapiClient(brapiSettings);
         
@@ -66,10 +76,10 @@ class Program
                     }
                     else
                     {
-                        Console.WriteLine($" Aguarde não houve variação: {alertLabel} Ativo - {quote.ShortName} - {quote.Currency} {quote.RegularMarketPrice}");
+                        Console.WriteLine($" Aguarde: {alertLabel} significativamente o Ativo - {quote.ShortName} - {quote.Currency} {quote.RegularMarketPrice}");
                     }
                 }
-                Thread.Sleep(60000); 
+                Thread.Sleep(delay); 
             }
             catch(BrapiApiException ex)
             {
