@@ -13,13 +13,10 @@ class Program
         if (args.Length < 3)
         {
             Console.WriteLine("Uso incorreto!");
-            Console.WriteLine("Exemplo correto (Ativo Valor Mínimo Valor Máximo): dotnet run PETR4 56.15 56.25");
+            Console.WriteLine("Exemplo correto (Ativo Valor_Mínimo Valor_Máximo): dotnet run PETR4 56.15 56.25");
             return;
         }
-
-        
         ticker = args[0].ToUpper();
-        
 
         if(!decimal.TryParse(args[1],out minPrice) || !decimal.TryParse(args[2],out maxPrice))
         {
@@ -49,7 +46,8 @@ class Program
         if(brapiSettings == null) return;
 
         var client = new BrapiClient(brapiSettings);
-
+        
+        decimal lastSendPrice = 0m;
         while (true)
         {
             try
@@ -58,11 +56,17 @@ class Program
 
                 if(quote != null)
                 {
-                    string? action = service.EvaluateQuote(quote, minPrice, maxPrice);
-                    if (action != null)
+                    AlertType alert = service.EvaluateQuote(quote, lastSendPrice, minPrice, maxPrice);
+                    string alertLabel = service.ConvertAlertType(alert);
+                    if (alert != AlertType.HOLD)
                     {
-                        await stockQuoteAlert.ProcessQuoteAlertAsync(quote, action);
-                        Console.WriteLine($" Alerta: {action} Ativo - {quote.ShortName} - {quote.Symbol} {quote.RegularMarketPrice}");
+                        await stockQuoteAlert.ProcessQuoteAlertAsync(quote, alertLabel);
+                        Console.WriteLine($" Alerta: {alertLabel} Ativo - {quote.ShortName} - {quote.Currency} {quote.RegularMarketPrice}");
+                        lastSendPrice = quote.RegularMarketPrice;
+                    }
+                    else
+                    {
+                        Console.WriteLine($" Aguarde não houve variação: {alertLabel} Ativo - {quote.ShortName} - {quote.Currency} {quote.RegularMarketPrice}");
                     }
                 }
                 Thread.Sleep(60000); 
