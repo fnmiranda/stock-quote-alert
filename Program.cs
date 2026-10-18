@@ -76,7 +76,7 @@ class Program
                     }
                     else
                     {
-                        Console.WriteLine($" Aguarde: {alertLabel} significativamente o Ativo - {quote.ShortName} - {quote.Currency} {quote.RegularMarketPrice}");
+                        Console.WriteLine($" Aguarde: o Ativo {alertLabel} - {quote.ShortName} - {quote.Currency} {quote.RegularMarketPrice}");
                     }
                 }
                 Thread.Sleep(delay); 
