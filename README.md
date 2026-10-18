@@ -6,7 +6,7 @@ Application em linha de comando (CLI) desenvolvida em **C# / .NET** para monitor
 
 ## 🚀 Funcionalidades
 
-- **Monitoramento em Tempo Real:** Consulta a API da [Brapi](https://brapi.dev/) em intervalos regulares configuráveis.
+- **Monitoramento em Tempo Real:** Consulta a API da [Brapi](https://brapi.dev/) em intervalos(Delay) regulares configuráveis no appsettings.json.
 - **Notificações por E-mail:** Disparo de e-mails em HTML responsivo e estilizado com resumo da cotação e recomendação de ação.
 - **Gestão Segura de Credenciais:** Separação estrita entre código e segredos utilizando **User Secrets** do .NET e variáveis de ambiente (evitando vazamento de senhas em repositórios Git).
 - **Tratamento de Erros e Resiliência:** Validação de tickers inexistentes e exceções customizadas (`BrapiApiException`).
@@ -15,7 +15,7 @@ Application em linha de comando (CLI) desenvolvida em **C# / .NET** para monitor
 ## 💻 Execução
 - Exemplo de execução o dotnet:
 `
-   dotnet run PETR3 56.15 56.25    
+   dotnet run PETR3 56.15 56.25
 `
 
 ---
@@ -36,12 +36,13 @@ O projeto utiliza o sistema de hierarquia de configurações do .NET, onde **as 
    | `SmtpSettings__SenderEmail` | `SmtpSettings:SenderEmail` |
    | `SmtpSettings__Username` | `SmtpSettings:Username` |
    | `SmtpSettings__Password` | `SmtpSettings:Password` |
-   | `BRAPI_API_KEY` | `BrapiSettings:Token` |
+   | `BrapiSettings__Apikey` | `BrapiSettings:ApiKey` |
 
 ### Exemplo de `.env` para Desenvolvimento Local:
+   Obs.: Lembrando que a SmtpSettings__Password não é a senha e sim o codigo de 16 digitos disponibilizado pelo google. Para sabe **[clique aqui](https://support.google.com/mail/answer/185833)**
 
 ```env
-BRAPI_API_KEY="seu_token_aqui"
+BrapiSettings__Apikey="seu_token_aqui"
 
 SmtpSettings__SenderEmail="seu_email@gmail.com"
 SmtpSettings__Username="seu_email@gmail.com"
@@ -95,7 +96,8 @@ src/
 │   └── Exceptions.cs                 # Exceção de domínio para falhas na API de cotações e do Email SMTP
 ├── Models/
 │   ├── Quote.cs                      # Modelo de dados da cotação
-│   └── QuoteResponse.cs              # DTO para desserialização da resposta JSON
+│   ├── QuoteResponse.cs              # DTO para desserialização da resposta JSON
+│   └── AlertType.cs                  # Enum com os valores BUY, SELL, e HOLD
 └── Services/
     ├── Brapi/
     │   ├── IBrapiClient.cs           # Interface do cliente HTTP
