@@ -17,7 +17,7 @@ public class StockQuoteEmailComposer: IStockQuoteEmailComposer
                     </tr>
                     <tr>
                         <th align='left'>Preço Atual</th>
-                        <td><strong>R$ {quote.RegularMarketPrice:F2}</strong></td>
+                        <td><strong> {quote.RegularMarketPrice:F2}</strong></td>
                     </tr>
                     <tr style='background-color: #f8f9fa;'>
                         <th align='left'>Variação</th>
