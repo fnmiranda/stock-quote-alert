@@ -44,13 +44,11 @@ class Program
             Console.WriteLine("A ApiKey da Brapi não foi informada ou está vazia no .env / appsettings.json.");
             return;
         }
-
-        int delay = 0;
-        if (!int.IsEvenInteger(brapiSettings.Delay))
+        string? delayFromJson = config["BrapiSettings:Delay"];
+        if (!int.TryParse(delayFromJson, out int delay))
         {
             delay = 60000;
         }
-        delay = brapiSettings.Delay;
 
         if(brapiSettings == null) return;
 
