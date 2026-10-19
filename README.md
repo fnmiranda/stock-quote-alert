@@ -113,7 +113,6 @@ src/
         ├── IStockService.cs          # Interface da classe StockService
         └── StockService.cs           # Avaliador das regras de negócio (Comprar/Vender)
 tests/
-└── Configuration/
-    └── StockQuoteAlert.Tests
-        ├── EvalueteQuoteTests.cs 
-        └── StockQuoteAlert.Tests.csproj
+└── StockQuoteAlert.Tests
+  ├── EvalueteQuoteTests.cs 
+  └── StockQuoteAlert.Tests.csproj
