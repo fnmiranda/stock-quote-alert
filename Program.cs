@@ -15,8 +15,6 @@ class Program
     static async Task Main(string[] args)
     {
         string ticker;
-        decimal minPrice; 
-        decimal maxPrice;
 
         if (args.Length < 3)
         {
@@ -26,40 +24,37 @@ class Program
         }
         ticker = args[0].ToUpper();
 
-        if(!decimal.TryParse(args[1],out minPrice) || !decimal.TryParse(args[2],out maxPrice))
+        if(!decimal.TryParse(args[1],out decimal minPrice) || !decimal.TryParse(args[2],out decimal maxPrice))
         {
             Console.WriteLine("Valor númerico incorreto. Exemplo de execução correta: dotnet run PETR4 56.15 56.25");
             return;
         }
-  
         minPrice = decimal.Parse(args[1].Replace(',', '.'), CultureInfo.InvariantCulture);
-        maxPrice = decimal.Parse(args[2].Replace(',', '.'), CultureInfo.InvariantCulture);
+        maxPrice = decimal.Parse(args[2].Replace(',', '.'), CultureInfo.InvariantCulture); 
+
+
 
         Env.Load();
-        var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddUserSecrets<Program>().AddEnvironmentVariables();
-        IConfiguration config = builder.Build();
+        IConfiguration config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddUserSecrets<Program>().AddEnvironmentVariables().Build();
+
         var smtpSettings = config.GetSection("SmtpSettings").Get<SmtpSettings>() ?? throw new InvalidOperationException("Seção SmtpSettings não configurada.");
 
         ISmtpEmailSender emailSender = new SmtpEmailSender(smtpSettings);
         IStockQuoteEmailComposer emailComposer = new StockQuoteEmailComposer();
         IStockService service = new StockService();
-        var stockQuoteAlert = new StockQuoteAlertService(emailSender,emailComposer);
+        IStockQuoteAlertService stockQuoteAlert = new StockQuoteAlertService(emailSender,emailComposer);
         
+
         var brapiSettings = config.GetSection("BrapiSettings").Get<BrapiSettings>();
+        if(brapiSettings == null) return;
+
         if (brapiSettings?.ApiKey == null || string.IsNullOrWhiteSpace(brapiSettings.ApiKey))
         {
             Console.WriteLine("A ApiKey da Brapi não foi informada ou está vazia no .env / appsettings.json.");
             return;
         }
-        string? delayFromJson = config["BrapiSettings:Delay"];
-        if (!int.TryParse(delayFromJson, out int delay))
-        {
-            delay = 60000;
-        }
 
-        if(brapiSettings == null) return;
-
-
+        int delay =  int.TryParse(brapiSettings.Delay, out int parsedDaley) ? parsedDaley : 30000;
         var client = new BrapiClient(brapiSettings);
         
         decimal lastSendPrice = 0m;
