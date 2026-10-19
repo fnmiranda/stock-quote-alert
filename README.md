@@ -112,3 +112,8 @@ src/
         ├── StockQuoteAlert.cs        # Orquestrador de regras de geração da mensagem do email
         ├── IStockService.cs          # Interface da classe StockService
         └── StockService.cs           # Avaliador das regras de negócio (Comprar/Vender)
+tests/
+└── Configuration/
+    └── StockQuoteAlert.Tests
+        ├── EvalueteQuoteTests.cs 
+        └── StockQuoteAlert.Tests.csproj
