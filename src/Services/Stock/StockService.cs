@@ -1,10 +1,13 @@
+namespace stock_quote_alert.src.Services.Stock;
 
+using stock_quote_alert.src.Models;
 
 public class StockService: IStockService
 {
     public AlertType EvaluateQuote(Quote quote,decimal lastSendPrice, decimal minPrice, decimal maxPrice)
     {
         decimal curretyPrice = quote.RegularMarketPrice;
+        decimal sensibility = 3m;
 
         if (lastSendPrice <= 0)
         {
@@ -13,10 +16,10 @@ public class StockService: IStockService
             return AlertType.HOLD;
         }
         
-        decimal variation = Math.Abs((lastSendPrice - curretyPrice)*1m);
+        decimal variation = Math.Abs((curretyPrice/lastSendPrice - 1)*100m);
 
-        if (curretyPrice > maxPrice && variation > 0) return AlertType.SELL;
-        if (curretyPrice < minPrice && variation > 0) return AlertType.BUY;
+        if (curretyPrice > maxPrice && variation > sensibility) return AlertType.SELL;
+        if (curretyPrice < minPrice && variation > sensibility) return AlertType.BUY;
         return AlertType.HOLD;
     }
 

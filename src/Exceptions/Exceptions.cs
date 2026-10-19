@@ -1,4 +1,4 @@
-
+namespace stock_quote_alert.src.Exceptions;
 public class BrapiApiException : Exception
 {
     public BrapiApiException(string message, Exception? innerException = null) 

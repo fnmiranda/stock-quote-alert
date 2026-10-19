@@ -1,3 +1,8 @@
+namespace stock_quote_alert.src.Services.Brapi;
+
+using stock_quote_alert.src.Models;
+using stock_quote_alert.src.Configuration;
+using stock_quote_alert.src.Exceptions;
 using System.Net.Http.Headers;
 using System.Text.Json;
 

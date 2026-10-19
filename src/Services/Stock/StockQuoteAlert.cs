@@ -1,10 +1,14 @@
+namespace stock_quote_alert.src.Services.Stock;
 
-public class StockQuoteAlert : IStockQuoteAlert
+using stock_quote_alert.src.Models;
+using stock_quote_alert.src.Services.Email;
+
+public class StockQuoteAlertService : IStockQuoteAlertService
 {
 
     private readonly ISmtpEmailSender _emailSender;
     private readonly IStockQuoteEmailComposer _emailComposer;
-    public StockQuoteAlert(ISmtpEmailSender emailSender, IStockQuoteEmailComposer emailComposer)
+    public StockQuoteAlertService(ISmtpEmailSender emailSender, IStockQuoteEmailComposer emailComposer)
     {
         _emailSender = emailSender;
         _emailComposer = emailComposer;

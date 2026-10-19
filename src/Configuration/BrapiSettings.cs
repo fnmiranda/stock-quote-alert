@@ -1,3 +1,5 @@
+namespace stock_quote_alert.src.Configuration;
+
 public class BrapiSettings
 {
     public string BaseUrl {get;set;} = string.Empty;

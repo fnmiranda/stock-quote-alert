@@ -1,3 +1,7 @@
+namespace stock_quote_alert.src.Services.Email;
+
+using stock_quote_alert.src.Configuration;
+using stock_quote_alert.src.Exceptions;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -11,7 +15,7 @@ public class SmtpEmailSender : ISmtpEmailSender
         _settings = smtpSettings;
     }
 
-    public async Task SendAsync(string subject, string body)
+    public async Task SendAsync(string subject, string body, CancellationToken cancellationToken = default) 
     {
         try
         {
@@ -27,7 +31,7 @@ public class SmtpEmailSender : ISmtpEmailSender
 
             using var client = new SmtpClient();
             var security = _settings.Port == 465  ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
-            await client.ConnectAsync(_settings.Server, _settings.Port, security);
+            await client.ConnectAsync(_settings.Server, _settings.Port, security, cancellationToken);
             
             if (client.Capabilities.HasFlag(SmtpCapabilities.Authentication))
             {
@@ -48,12 +52,11 @@ public class SmtpEmailSender : ISmtpEmailSender
                     {
                         throw new EmailSendException("Falha na autenticação SMTP: O e-mail ou a Senha de App informados são inválidos.");
                     }
-
                     throw new EmailSendException("A conexão com o servidor SMTP foi interrompida durante o login.");
                 }
             }
             await client.SendAsync(message);
-            await client.DisconnectAsync(true);
+            await client.DisconnectAsync(true, cancellationToken);
 
         }
         catch (EmailSendException)

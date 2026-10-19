@@ -1,3 +1,4 @@
+namespace stock_quote_alert.src.Configuration;
 public class SmtpSettings
 {
     public string Server { get; set; } = string.Empty;

@@ -1,8 +1,15 @@
-﻿
+﻿namespace stock_quote_alert;
+
 using DotNetEnv;
 using Microsoft.Extensions.Configuration;
-using Superpower;
 using System.Globalization;
+
+using stock_quote_alert.src.Models;
+using stock_quote_alert.src.Services.Stock;
+using stock_quote_alert.src.Services.Email;
+using stock_quote_alert.src.Services.Brapi;
+using stock_quote_alert.src.Configuration;
+using stock_quote_alert.src.Exceptions;
 class Program
 {
     static async Task Main(string[] args)
@@ -36,7 +43,7 @@ class Program
         ISmtpEmailSender emailSender = new SmtpEmailSender(smtpSettings);
         IStockQuoteEmailComposer emailComposer = new StockQuoteEmailComposer();
         IStockService service = new StockService();
-        var stockQuoteAlert = new StockQuoteAlert(emailSender,emailComposer);
+        var stockQuoteAlert = new StockQuoteAlertService(emailSender,emailComposer);
         
         var brapiSettings = config.GetSection("BrapiSettings").Get<BrapiSettings>();
         if (brapiSettings?.ApiKey == null || string.IsNullOrWhiteSpace(brapiSettings.ApiKey))

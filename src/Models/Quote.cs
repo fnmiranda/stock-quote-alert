@@ -1,3 +1,5 @@
+namespace stock_quote_alert.src.Models;
+
 public class Quote
 {
     public required string Symbol { get; set; }
